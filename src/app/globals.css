@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground: #171717;
+  --background: #ffffff;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.score-excellent { @apply text-emerald-600 bg-emerald-50; }
+.score-good { @apply text-blue-600 bg-blue-50; }
+.score-average { @apply text-yellow-600 bg-yellow-50; }
+.score-weak { @apply text-orange-600 bg-orange-50; }
+.score-poor { @apply text-red-600 bg-red-50; }
+
+.progress-bar {
+  transition: width 0.5s ease-in-out;
+}

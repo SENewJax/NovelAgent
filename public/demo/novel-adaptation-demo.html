@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小说改编工作台 - Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .header-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 30px;
+        }
+
+        /* Drop Zone */
+        .drop-zone {
+            border: 3px dashed #cbd5e0;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            margin-bottom: 30px;
+        }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: #667eea;
+            background: #f7fafc;
+        }
+
+        .drop-zone-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .drop-zone-text {
+            color: #718096;
+            font-size: 16px;
+        }
+
+        .drop-zone-text span {
+            color: #667eea;
+            text-decoration: underline;
+        }
+
+        /* Novel Info */
+        .novel-info {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .novel-info.active {
+            display: block;
+        }
+
+        .novel-info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .novel-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .novel-stats {
+            display: flex;
+            gap: 20px;
+            color: #718096;
+            font-size: 14px;
+        }
+
+        /* Role Selection */
+        .role-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .role-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .role-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .role-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .role-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+        }
+
+        .role-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .role-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .role-desc {
+            color: #718096;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .role-model {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 13px;
+            color: #667eea;
+        }
+
+        /* Work Area */
+        .work-area {
+            display: none;
+        }
+
+        .work-area.active {
+            display: block;
+        }
+
+        /* Editor Panel */
+        .editor-panel {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 25px;
+        }
+
+        .panel-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .panel-tab {
+            padding: 10px 20px;
+            border: none;
+            background: #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #4a5568;
+            transition: all 0.2s;
+        }
+
+        .panel-tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        /* Options */
+        .option-group {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .option-group-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f7fafc;
+        }
+
+        .option-item:last-child {
+            border-bottom: none;
+        }
+
+        .option-checkbox, .option-radio {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            accent-color: #667eea;
+        }
+
+        .option-label {
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        /* Custom Settings */
+        .custom-setting-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .custom-setting-input input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .custom-setting-input input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .add-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .add-btn:hover {
+            background: #5a6fd6;
+        }
+
+        /* Settings List */
+        .settings-list {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f7fafc;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .setting-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .setting-text {
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        .setting-tag {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            color: #718096;
+        }
+
+        .setting-delete {
+            background: #fc8181;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .setting-delete:hover {
+            background: #f56565;
+        }
+
+        /* User Prompt */
+        .user-prompt {
+            margin-top: 20px;
+        }
+
+        .user-prompt textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            min-height: 100px;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+
+        .user-prompt textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        /* Plan View */
+        .plan-view {
+            display: none;
+        }
+
+        .plan-view.active {
+            display: block;
+        }
+
+        .plan-content {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+
+        /* Writer Panel */
+        .writer-panel {
+            display: none;
+        }
+
+        .writer-panel.active {
+            display: block;
+        }
+
+        .progress-bar {
+            background: #e2e8f0;
+            border-radius: 10px;
+            height: 20px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            width: 33%;
+        }
+
+        .content-area {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            min-height: 300px;
+            max-height: 500px;
+            overflow-y: auto;
+            line-height: 1.8;
+            color: #2d3748;
+        }
+
+        .writer-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .control-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .control-btn.primary {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .control-btn.primary:hover {
+            background: #5a6fd6;
+        }
+
+        /* Settings Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+        }
+
+        .modal-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-body {
+            padding: 30px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            background: #f7fafc;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Settings Sections */
+        .settings-section {
+            margin-bottom: 30px;
+        }
+
+        .settings-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        /* API Config */
+        .api-config {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .api-config input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .api-config input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .fetch-btn {
+            background: #48bb78;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .fetch-btn:hover {
+            background: #38a169;
+        }
+
+        /* Model List */
+        .model-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .model-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: #f7fafc;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .model-item:hover {
+            border-color: #667eea;
+        }
+
+        .model-item.selected {
+            border-color: #667eea;
+            background: #667eea10;
+        }
+
+        .model-item input[type="checkbox"] {
+            margin-right: 10px;
+            accent-color: #667eea;
+        }
+
+        .model-name {
+            font-size: 13px;
+            color: #2d3748;
+            word-break: break-all;
+        }
+
+        /* Role Model Config */
+        .role-model-config {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .role-model-item {
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+
+        .role-model-item label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .role-model-item select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .role-model-item select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* Option Manager */
+        .option-manager {
+            margin-bottom: 15px;
+        }
+
+        .option-add-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .option-add-row input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .option-add-row input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .option-add-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .option-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .option-tag {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: #f7fafc;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #4a5568;
+        }
+
+        .option-tag .remove {
+            background: #e2e8f0;
+            border: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #718096;
+        }
+
+        .option-tag .remove:hover {
+            background: #fc8181;
+            color: white;
+        }
+
+        /* Loading */
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Status indicator */
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-dot.connected {
+            background: #48bb78;
+        }
+
+        .status-dot.disconnected {
+            background: #fc8181;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .role-cards, .role-model-config {
+                grid-template-columns: 1fr;
+            }
+
+            .api-config {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📚 小说改编工作台</h1>
+            <div class="header-actions">
+                <button class="header-btn" onclick="openSettings()">⚙️ 设置</button>
+                <button class="header-btn">❓ 帮助</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Drop Zone -->
+            <div class="drop-zone" id="dropZone">
+                <div class="drop-zone-icon">📁</div>
+                <div class="drop-zone-text">
+                    拖动小说到此处上传，或 <span>点击选择文件</span>
+                </div>
+            </div>
+
+            <!-- Novel Info -->
+            <div class="novel-info" id="novelInfo">
+                <div class="novel-info-header">
+                    <div class="novel-title">📖 末世重生之都市逆袭.txt</div>
+                    <button class="header-btn" onclick="resetNovel()">✕ 移除</button>
+                </div>
+                <div class="novel-stats">
+                    <span>📄 156 章</span>
+                    <span>📝 52.3 万字</span>
+                    <span>📅 2024-01-15</span>
+                </div>
+            </div>
+
+            <!-- Role Selection -->
+            <div class="role-section" id="roleSection">
+                <div class="section-title">👥 选择角色</div>
+                <div class="role-cards">
+                    <div class="role-card" id="editorCard" onclick="selectRole('editor')">
+                        <div class="role-icon">📚</div>
+                        <div class="role-name">小说主编</div>
+                        <div class="role-desc">
+                            分析原始小说，生成大纲，制定执行计划<br>
+                            • 分析故事背景、人物角色、剧情走向<br>
+                            • 补充剧情改写选项<br>
+                            • 生成执行计划
+                        </div>
+                        <div class="role-model" id="editorModelDisplay">
+                            🤖 模型: 未设置
+                        </div>
+                    </div>
+                    <div class="role-card" id="writerCard" onclick="selectRole('writer')">
+                        <div class="role-icon">✍️</div>
+                        <div class="role-name">小说写手</div>
+                        <div class="role-desc">
+                            基于大纲和执行计划，执行小说生成<br>
+                            • 按章节逐步生成<br>
+                            • 流式输出内容<br>
+                            • 进度追踪
+                        </div>
+                        <div class="role-model" id="writerModelDisplay">
+                            🤖 模型: 未设置
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Work Area -->
+            <div class="work-area" id="workArea">
+                <!-- Editor Panel -->
+                <div class="editor-panel" id="editorPanel">
+                    <div class="panel-tabs">
+                        <button class="panel-tab active" onclick="switchTab('outline')">补充大纲</button>
+                        <button class="panel-tab" onclick="switchTab('plan')">执行计划</button>
+                    </div>
+
+                    <!-- Outline Options -->
+                    <div class="outline-options" id="outlineOptions">
+                        <!-- 剧情改写选项 (固定选项) -->
+                        <div class="option-group">
+                            <div class="option-group-title">
+                                📌 剧情改写选项
+                                <small style="color: #718096; font-weight: normal;">(多选，可在设置中管理)</small>
+                            </div>
+                            <div id="rewriteOptionsContainer">
+                                <!-- 动态生成 -->
+                            </div>
+                        </div>
+
+                        <!-- 剧情选项 (可选项) -->
+                        <div class="option-group">
+                            <div class="option-group-title">
+                                🎭 剧情选项
+                                <small style="color: #718096; font-weight: normal;">(单选，可在设置中管理)</small>
+                            </div>
+                            <div id="genreOptionsContainer">
+                                <!-- 动态生成 -->
+                            </div>
+                        </div>
+
+                        <!-- 补充设定 -->
+                        <div class="option-group">
+                            <div class="option-group-title">✏️ 补充设定</div>
+                            <div class="custom-setting-input">
+                                <input type="text" id="customSettingInput" placeholder="输入自定义设定...">
+                                <button class="add-btn" onclick="addCustomSetting()">+ 添加</button>
+                            </div>
+                        </div>
+
+                        <!-- 设定清单 -->
+                        <div class="option-group">
+                            <div class="option-group-title">📋 设定清单</div>
+                            <div class="settings-list" id="settingsList">
+                                <!-- 动态生成 -->
+                            </div>
+                        </div>
+
+                        <!-- User Prompt -->
+                        <div class="user-prompt">
+                            <div class="section-title">💬 用户提示词</div>
+                            <textarea id="userPrompt" placeholder="分析故事背景、人物角色、剧情走向..."></textarea>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <button class="btn-primary" onclick="generateOutline()">
+                                🚀 执行生成大纲
+                            </button>
+                            <button class="btn-secondary" onclick="resetOptions()">
+                                🔄 重置选项
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Plan View -->
+                    <div class="plan-view" id="planView">
+                        <div class="option-group">
+                            <div class="option-group-title">📄 生成的大纲</div>
+                            <div class="plan-content" id="planContent">
+# 生成计划
+标题: 末世重生之都市逆袭
+类型: 末世求生
+目标总字数: 约60千字
+章节数: 15
+
+## 章节结构
+  1. 第一章 重生归来 (约4千字)
+  2. 第二章 末世前兆 (约4千字)
+  3. 第三章 异能觉醒 (约4千字)
+  4. 第四章 组建团队 (约4千字)
+  5. 第五章 第一次危机 (约4千字)
+  6. 第六章 建立基地 (约4千字)
+  7. 第七章 资源争夺 (约4千字)
+  8. 第八章 敌人来袭 (约4千字)
+  9. 第九章 背叛与信任 (约4千字)
+  10. 第十章 异能进化 (约4千字)
+  11. 第十一章 末世真相 (约4千字)
+  12. 第十二章 最终决战 (约4千字)
+  13. 第十三章 新秩序 (约4千字)
+  14. 第十四章 重建家园 (约4千字)
+  15. 第十五章 希望之光 (约4千字)
+
+## 约束条件
+  - 角色名随机（中式姓氏）
+  - 城市布局采用中国（禁止名称直接映射）
+  - 历史背景架空
+  - 末世求生题材
+  - 主角要有特殊能力
+                            </div>
+                        </div>
+
+                        <div class="action-buttons">
+                            <button class="btn-primary" onclick="executePlan()">
+                                ⚡ 执行计划
+                            </button>
+                            <button class="btn-secondary" onclick="switchTab('outline')">
+                                ← 返回修改
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Writer Panel -->
+                <div class="writer-panel" id="writerPanel">
+                    <div class="option-group">
+                        <div class="option-group-title">📊 生成进度</div>
+                        <div style="display: flex; justify-content: space-between; color: #718096; font-size: 14px;">
+                            <span>进度: 5/15 章</span>
+                            <span>已生成: 约2万字 / 6万字</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                    </div>
+
+                    <div class="option-group">
+                        <div class="option-group-title">📖 生成内容</div>
+                        <div class="content-area" id="contentArea">
+                            <h3>第一章 重生归来</h3>
+                            <p>林峰猛然睁开眼睛，发现自己躺在一间熟悉的房间里。这是他大学时代的宿舍，窗外是熟悉的校园景色。</p>
+                            <p>"我...重生了？"他喃喃自语，脑海中涌入大量记忆。</p>
+                            <p>上一世，末世降临，他作为一个普通人，在末世中苦苦挣扎。最终在一次尸潮中，为了保护队友，他选择了断后。没想到，老天给了他一次重来的机会。</p>
+                            <p>"这一次，我一定要改变命运！"林峰握紧拳头，眼中闪过坚定的光芒。</p>
+                            <p>他看了看手机，现在是2024年3月15日，距离末世降临还有整整一个月。这一个月，是他改变命运的最后机会。</p>
+                            <p>...</p>
+                        </div>
+                    </div>
+
+                    <div class="writer-controls">
+                        <button class="control-btn" onclick="pauseGeneration()">⏸ 暂停</button>
+                        <button class="control-btn primary" onclick="resumeGeneration()">▶️ 继续</button>
+                        <button class="control-btn" onclick="regenerate()">🔄 重新生成</button>
+                        <button class="control-btn" onclick="exportNovel()">📥 导出</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>⚙️ 设置</h2>
+                <button class="modal-close" onclick="closeSettings()">✕</button>
+            </div>
+            <div class="modal-body">
+                <!-- API Configuration -->
+                <div class="settings-section">
+                    <div class="settings-section-title">🔗 API 配置</div>
+                    <div class="api-config">
+                        <input type="text" id="apiBaseUrl" placeholder="API Base URL (如: https://api.openai.com/v1)" value="https://api.openai.com/v1">
+                        <input type="password" id="apiKey" placeholder="API Key">
+                        <button class="fetch-btn" onclick="fetchModels()">
+                            🔄 获取模型
+                        </button>
+                    </div>
+                    <div style="font-size: 12px; color: #718096;">
+                        <span class="status-dot disconnected" id="apiStatus"></span>
+                        <span id="apiStatusText">未连接</span>
+                    </div>
+                </div>
+
+                <!-- Available Models -->
+                <div class="settings-section">
+                    <div class="settings-section-title">🤖 可用模型 <small style="color: #718096;">(勾选启用)</small></div>
+                    <div class="model-list" id="modelList">
+                        <div style="color: #718096; padding: 20px; text-align: center;">
+                            请先获取模型列表
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Role Model Assignment -->
+                <div class="settings-section">
+                    <div class="settings-section-title">👤 角色模型分配</div>
+                    <div class="role-model-config">
+                        <div class="role-model-item">
+                            <label>📚 小说主编</label>
+                            <select id="editorModelSelect">
+                                <option value="">请先获取模型</option>
+                            </select>
+                        </div>
+                        <div class="role-model-item">
+                            <label>✍️ 小说写手</label>
+                            <select id="writerModelSelect">
+                                <option value="">请先获取模型</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 剧情改写选项管理 -->
+                <div class="settings-section">
+                    <div class="settings-section-title">📌 剧情改写选项管理 <small style="color: #718096;">(多选)</small></div>
+                    <div class="option-manager">
+                        <div class="option-add-row">
+                            <input type="text" id="newRewriteOption" placeholder="添加新的剧情改写选项...">
+                            <button class="option-add-btn" onclick="addRewriteOption()">+ 添加</button>
+                        </div>
+                        <div class="option-list" id="rewriteOptionList">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 剧情选项管理 -->
+                <div class="settings-section">
+                    <div class="settings-section-title">🎭 剧情选项管理 <small style="color: #718096;">(单选)</small></div>
+                    <div class="option-manager">
+                        <div class="option-add-row">
+                            <input type="text" id="newGenreOption" placeholder="添加新的剧情选项...">
+                            <button class="option-add-btn" onclick="addGenreOption()">+ 添加</button>
+                        </div>
+                        <div class="option-list" id="genreOptionList">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeSettings()">取消</button>
+                <button class="btn-primary" onclick="saveSettings()">💾 保存设置</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== State ====================
+        const state = {
+            novel: null,
+            role: null,
+            customSettings: [],
+
+            // API Config
+            api: {
+                baseUrl: 'https://api.openai.com/v1',
+                apiKey: '',
+                connected: false
+            },
+
+            // Models
+            models: [], // [{id, name, enabled}]
+            roleModels: {
+                editor: '',
+                writer: ''
+            },
+
+            // Options
+            rewriteOptions: [
+                { id: 1, text: '角色名随机（中式姓氏）', enabled: true },
+                { id: 2, text: '城市布局采用中国（禁止名称直接映射）', enabled: true },
+                { id: 3, text: '历史背景架空', enabled: true }
+            ],
+            genreOptions: [
+                { id: 1, text: '末世求生', enabled: true },
+                { id: 2, text: '虐恋', enabled: false },
+                { id: 3, text: '甜甜恋爱', enabled: false }
+            ],
+            selectedGenre: null
+        };
+
+        // ==================== Initialization ====================
+        function init() {
+            loadSettings();
+            renderAll();
+            setupEventListeners();
+        }
+
+        function loadSettings() {
+            const saved = localStorage.getItem('novelAdaptationSettings');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    Object.assign(state.api, parsed.api || {});
+                    state.models = parsed.models || [];
+                    state.roleModels = parsed.roleModels || { editor: '', writer: '' };
+                    state.rewriteOptions = parsed.rewriteOptions || state.rewriteOptions;
+                    state.genreOptions = parsed.genreOptions || state.genreOptions;
+                } catch (e) {
+                    console.error('Failed to load settings:', e);
+                }
+            }
+        }
+
+        function saveSettings() {
+            localStorage.setItem('novelAdaptationSettings', JSON.stringify({
+                api: state.api,
+                models: state.models,
+                roleModels: state.roleModels,
+                rewriteOptions: state.rewriteOptions,
+                genreOptions: state.genreOptions
+            }));
+            closeSettings();
+            renderAll();
+            alert('设置已保存！');
+        }
+
+        // ==================== Event Listeners ====================
+        function setupEventListeners() {
+            // Drop Zone
+            const dropZone = document.getElementById('dropZone');
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+            dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+                handleFileUpload();
+            });
+            dropZone.addEventListener('click', handleFileUpload);
+        }
+
+        // ==================== File Upload ====================
+        function handleFileUpload() {
+            state.novel = {
+                name: '末世重生之都市逆袭.txt',
+                chapters: 156,
+                words: '52.3万字',
+                date: '2024-01-15'
+            };
+            document.getElementById('dropZone').style.display = 'none';
+            document.getElementById('novelInfo').classList.add('active');
+            document.getElementById('roleSection').style.display = 'block';
+        }
+
+        function resetNovel() {
+            state.novel = null;
+            state.role = null;
+            document.getElementById('dropZone').style.display = 'block';
+            document.getElementById('novelInfo').classList.remove('active');
+            document.getElementById('roleSection').style.display = 'none';
+            document.getElementById('workArea').classList.remove('active');
+            document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+        }
+
+        // ==================== Role Selection ====================
+        function selectRole(role) {
+            state.role = role;
+            document.getElementById('editorCard').classList.toggle('selected', role === 'editor');
+            document.getElementById('writerCard').classList.toggle('selected', role === 'writer');
+            document.getElementById('workArea').classList.add('active');
+            document.getElementById('editorPanel').style.display = role === 'editor' ? 'block' : 'none';
+            document.getElementById('writerPanel').style.display = role === 'writer' ? 'block' : 'none';
+            if (role === 'editor') switchTab('outline');
+        }
+
+        // ==================== Tab Switching ====================
+        function switchTab(tab) {
+            document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+            if (tab === 'outline') {
+                document.querySelectorAll('.panel-tab')[0].classList.add('active');
+                document.getElementById('outlineOptions').style.display = 'block';
+                document.getElementById('planView').style.display = 'none';
+            } else {
+                document.querySelectorAll('.panel-tab')[1].classList.add('active');
+                document.getElementById('outlineOptions').style.display = 'none';
+                document.getElementById('planView').style.display = 'block';
+            }
+        }
+
+        // ==================== Settings Modal ====================
+        function openSettings() {
+            document.getElementById('settingsModal').classList.add('active');
+            document.getElementById('apiBaseUrl').value = state.api.baseUrl;
+            document.getElementById('apiKey').value = state.api.apiKey;
+            renderSettingsModels();
+            renderSettingsOptions();
+            updateRoleModelSelects();
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.remove('active');
+        }
+
+        // ==================== API & Models ====================
+        async function fetchModels() {
+            const baseUrl = document.getElementById('apiBaseUrl').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
+
+            if (!baseUrl || !apiKey) {
+                alert('请输入 API Base URL 和 API Key');
+                return;
+            }
+
+            state.api.baseUrl = baseUrl;
+            state.api.apiKey = apiKey;
+
+            // Show loading
+            const btn = document.querySelector('.fetch-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="loading-spinner"></span> 获取中...';
+            btn.disabled = true;
+
+            try {
+                // Try to fetch models using OpenAI standard endpoint
+                const response = await fetch(`${baseUrl}/models`, {
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const modelIds = data.data.map(m => m.id).sort();
+
+                    // Merge with existing models, keep enabled state
+                    const existingIds = state.models.map(m => m.id);
+                    state.models = modelIds.map(id => ({
+                        id,
+                        name: id,
+                        enabled: existingIds.includes(id) ? state.models.find(m => m.id === id).enabled : true
+                    }));
+
+                    state.api.connected = true;
+                    document.getElementById('apiStatus').className = 'status-dot connected';
+                    document.getElementById('apiStatusText').textContent = `已连接 (${state.models.length} 个模型)`;
+
+                    renderSettingsModels();
+                    updateRoleModelSelects();
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                console.error('Fetch models failed:', error);
+                state.api.connected = false;
+                document.getElementById('apiStatus').className = 'status-dot disconnected';
+                document.getElementById('apiStatusText').textContent = `连接失败: ${error.message}`;
+
+                // Use demo models as fallback
+                if (state.models.length === 0) {
+                    state.models = [
+                        { id: 'gpt-4o', name: 'gpt-4o', enabled: true },
+                        { id: 'gpt-4o-mini', name: 'gpt-4o-mini', enabled: true },
+                        { id: 'gpt-4-turbo', name: 'gpt-4-turbo', enabled: true },
+                        { id: 'gpt-3.5-turbo', name: 'gpt-3.5-turbo', enabled: false },
+                        { id: 'claude-3-opus', name: 'claude-3-opus', enabled: true },
+                        { id: 'claude-3-sonnet', name: 'claude-3-sonnet', enabled: true },
+                        { id: 'deepseek-chat', name: 'deepseek-chat', enabled: true },
+                        { id: 'qwen-turbo', name: 'qwen-turbo', enabled: false }
+                    ];
+                    renderSettingsModels();
+                    updateRoleModelSelects();
+                }
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function renderSettingsModels() {
+            const container = document.getElementById('modelList');
+            if (state.models.length === 0) {
+                container.innerHTML = '<div style="color: #718096; padding: 20px; text-align: center;">请先获取模型列表</div>';
+                return;
+            }
+
+            container.innerHTML = state.models.map(m => `
+                <div class="model-item ${m.enabled ? 'selected' : ''}" onclick="toggleModel('${m.id}')">
+                    <input type="checkbox" ${m.enabled ? 'checked' : ''} onclick="event.stopPropagation(); toggleModel('${m.id}')">
+                    <span class="model-name">${m.name}</span>
+                </div>
+            `).join('');
+        }
+
+        function toggleModel(id) {
+            const model = state.models.find(m => m.id === id);
+            if (model) {
+                model.enabled = !model.enabled;
+                renderSettingsModels();
+                updateRoleModelSelects();
+            }
+        }
+
+        function updateRoleModelSelects() {
+            const enabledModels = state.models.filter(m => m.enabled);
+            const options = enabledModels.map(m =>
+                `<option value="${m.id}" ${state.roleModels.editor === m.id ? 'selected' : ''}>${m.name}</option>`
+            ).join('');
+
+            document.getElementById('editorModelSelect').innerHTML =
+                '<option value="">请选择模型</option>' + options;
+            document.getElementById('writerModelSelect').innerHTML =
+                '<option value="">请选择模型</option>' + options;
+
+            // Update current selections
+            if (state.roleModels.editor) {
+                document.getElementById('editorModelSelect').value = state.roleModels.editor;
+            }
+            if (state.roleModels.writer) {
+                document.getElementById('writerModelSelect').value = state.roleModels.writer;
+            }
+
+            // Add change listeners
+            document.getElementById('editorModelSelect').onchange = (e) => {
+                state.roleModels.editor = e.target.value;
+                updateRoleModelDisplay();
+            };
+            document.getElementById('writerModelSelect').onchange = (e) => {
+                state.roleModels.writer = e.target.value;
+                updateRoleModelDisplay();
+            };
+
+            updateRoleModelDisplay();
+        }
+
+        function updateRoleModelDisplay() {
+            document.getElementById('editorModelDisplay').textContent =
+                `🤖 模型: ${state.roleModels.editor || '未设置'}`;
+            document.getElementById('writerModelDisplay').textContent =
+                `🤖 模型: ${state.roleModels.writer || '未设置'}`;
+        }
+
+        // ==================== Options Management ====================
+        function renderSettingsOptions() {
+            // Rewrite Options
+            document.getElementById('rewriteOptionList').innerHTML = state.rewriteOptions.map(o => `
+                <div class="option-tag">
+                    <span>${o.text}</span>
+                    <button class="remove" onclick="removeRewriteOption(${o.id})">✕</button>
+                </div>
+            `).join('');
+
+            // Genre Options
+            document.getElementById('genreOptionList').innerHTML = state.genreOptions.map(o => `
+                <div class="option-tag">
+                    <span>${o.text}</span>
+                    <button class="remove" onclick="removeGenreOption(${o.id})">✕</button>
+                </div>
+            `).join('');
+        }
+
+        function addRewriteOption() {
+            const input = document.getElementById('newRewriteOption');
+            const text = input.value.trim();
+            if (text) {
+                state.rewriteOptions.push({
+                    id: Date.now(),
+                    text,
+                    enabled: true
+                });
+                input.value = '';
+                renderSettingsOptions();
+            }
+        }
+
+        function removeRewriteOption(id) {
+            state.rewriteOptions = state.rewriteOptions.filter(o => o.id !== id);
+            renderSettingsOptions();
+        }
+
+        function addGenreOption() {
+            const input = document.getElementById('newGenreOption');
+            const text = input.value.trim();
+            if (text) {
+                state.genreOptions.push({
+                    id: Date.now(),
+                    text,
+                    enabled: true
+                });
+                input.value = '';
+                renderSettingsOptions();
+            }
+        }
+
+        function removeGenreOption(id) {
+            state.genreOptions = state.genreOptions.filter(o => o.id !== id);
+            renderSettingsOptions();
+        }
+
+        // ==================== Render Main UI ====================
+        function renderAll() {
+            renderRewriteOptions();
+            renderGenreOptions();
+            renderCustomSettings();
+            updateRoleModelDisplay();
+        }
+
+        function renderRewriteOptions() {
+            const container = document.getElementById('rewriteOptionsContainer');
+            container.innerHTML = state.rewriteOptions.map(o => `
+                <div class="option-item">
+                    <input type="checkbox" class="option-checkbox" id="rewrite_${o.id}"
+                        ${o.enabled ? 'checked' : ''}
+                        onchange="toggleRewriteOption(${o.id})">
+                    <label class="option-label" for="rewrite_${o.id}">${o.text}</label>
+                </div>
+            `).join('');
+        }
+
+        function toggleRewriteOption(id) {
+            const option = state.rewriteOptions.find(o => o.id === id);
+            if (option) {
+                option.enabled = !option.enabled;
+                renderCustomSettings();
+            }
+        }
+
+        function renderGenreOptions() {
+            const container = document.getElementById('genreOptionsContainer');
+            container.innerHTML = state.genreOptions.map(o => `
+                <div class="option-item">
+                    <input type="radio" name="genre" class="option-radio" id="genre_${o.id}"
+                        value="${o.text}"
+                        ${state.selectedGenre === o.text ? 'checked' : ''}>
+                    <label class="option-label" for="genre_${o.id}">${o.text}</label>
+                </div>
+            `).join('');
+
+            // Add change listeners
+            document.querySelectorAll('input[name="genre"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    state.selectedGenre = e.target.value;
+                    renderCustomSettings();
+                });
+            });
+        }
+
+        function renderCustomSettings() {
+            const list = document.getElementById('settingsList');
+            let html = '';
+
+            // Rewrite options (show selected)
+            state.rewriteOptions.filter(o => o.enabled).forEach(o => {
+                html += `
+                    <div class="setting-item">
+                        <span class="setting-text">✅ ${o.text}</span>
+                        <span class="setting-tag">剧情改写</span>
+                    </div>
+                `;
+            });
+
+            // Genre option (if selected)
+            if (state.selectedGenre) {
+                html += `
+                    <div class="setting-item">
+                        <span class="setting-text">🎭 ${state.selectedGenre}</span>
+                        <span class="setting-tag">剧情选项</span>
+                    </div>
+                `;
+            }
+
+            // Custom settings
+            state.customSettings.forEach((s, i) => {
+                html += `
+                    <div class="setting-item">
+                        <span class="setting-text">✏️ ${s}</span>
+                        <button class="setting-delete" onclick="removeCustomSetting(${i})">删除</button>
+                    </div>
+                `;
+            });
+
+            list.innerHTML = html;
+        }
+
+        // ==================== Custom Settings ====================
+        function addCustomSetting() {
+            const input = document.getElementById('customSettingInput');
+            const text = input.value.trim();
+            if (text) {
+                state.customSettings.push(text);
+                input.value = '';
+                renderCustomSettings();
+            }
+        }
+
+        function removeCustomSetting(index) {
+            state.customSettings.splice(index, 1);
+            renderCustomSettings();
+        }
+
+        // ==================== Actions ====================
+        function generateOutline() {
+            const selectedRewrite = state.rewriteOptions.filter(o => o.enabled);
+            if (selectedRewrite.length === 0) {
+                alert('请至少选择一个剧情改写选项');
+                return;
+            }
+
+            if (!state.selectedGenre) {
+                alert('请选择一个剧情选项');
+                return;
+            }
+
+            const summary = [
+                '正在生成大纲...',
+                '',
+                '剧情改写选项:',
+                ...selectedRewrite.map(o => `  • ${o.text}`),
+                '',
+                `剧情选项: ${state.selectedGenre}`,
+                ...state.customSettings.map(s => `补充设定: ${s}`),
+                '',
+                '（Demo 演示，实际会调用 AI 生成）'
+            ].join('\n');
+
+            alert(summary);
+            switchTab('plan');
+        }
+
+        function executePlan() {
+            alert('开始执行计划...\n\n（Demo 演示，实际会调用写手生成）');
+            selectRole('writer');
+        }
+
+        function resetOptions() {
+            state.rewriteOptions.forEach(o => o.enabled = true);
+            state.selectedGenre = null;
+            state.customSettings = [];
+            renderAll();
+            document.getElementById('userPrompt').value = '';
+        }
+
+        function pauseGeneration() { alert('已暂停生成'); }
+        function resumeGeneration() { alert('继续生成...'); }
+        function regenerate() { alert('重新生成当前章节...'); }
+        function exportNovel() { alert('导出小说...\n\n（Demo 演示，实际会下载文件）'); }
+
+        // ==================== Initialize ====================
+        init();
+    </script>
+</body>
+</html>
